@@ -3,6 +3,8 @@
 
 #include <QOpenGLWidget>
 #include <QMatrix4x4>
+#include <QOpenGLShaderProgram>
+#include <QOpenGLTexture>
 
 class Widget : public QOpenGLWidget
 {
@@ -16,8 +18,40 @@ protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
     void paintGL() override;
+    void initShaders();
 
 private:
     QMatrix4x4 m_projectionMatrix;
+    QOpenGLShaderProgram m_program;
+    QOpenGLTexture *m_texture;
 };
 #endif // WIDGET_H
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
