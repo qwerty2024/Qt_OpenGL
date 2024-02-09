@@ -6,6 +6,7 @@
 #include <QOpenGLShaderProgram>
 #include <QOpenGLTexture>
 #include <QOpenGLBuffer>
+#include <QMouseEvent>
 
 struct VertexData
 {
@@ -33,12 +34,17 @@ protected:
     void initShaders();
     void initCube(float width);
 
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+
 private:
     QMatrix4x4 m_projectionMatrix;
     QOpenGLShaderProgram m_program;
     QOpenGLTexture *m_texture;
     QOpenGLBuffer m_arrayBuffer;
     QOpenGLBuffer m_indexBuffer;
+    QVector2D m_mousePosition;
+    QQuaternion m_rotation;
 };
 #endif // WIDGET_H
 
