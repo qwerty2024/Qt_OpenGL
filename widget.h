@@ -8,16 +8,7 @@
 #include <QOpenGLBuffer>
 #include <QMouseEvent>
 
-struct VertexData
-{
-    VertexData() {}
-    VertexData(QVector3D p, QVector2D t, QVector3D n) :
-        position(p), texCoord(t), normal(n) {}
-
-    QVector3D position;
-    QVector2D texCoord;
-    QVector3D normal;
-};
+class SimpleObject3D;
 
 class Widget : public QOpenGLWidget
 {
@@ -40,11 +31,10 @@ protected:
 private:
     QMatrix4x4 m_projectionMatrix;
     QOpenGLShaderProgram m_program;
-    QOpenGLTexture *m_texture;
-    QOpenGLBuffer m_arrayBuffer;
-    QOpenGLBuffer m_indexBuffer;
     QVector2D m_mousePosition;
     QQuaternion m_rotation;
+
+    QVector<SimpleObject3D *> m_objects;
 };
 #endif // WIDGET_H
 

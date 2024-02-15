@@ -19,9 +19,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
+    simpleobject3d.cpp \
     widget.cpp
 
 HEADERS += \
+    simpleobject3d.h \
     widget.h
 
 # Default rules for deployment.

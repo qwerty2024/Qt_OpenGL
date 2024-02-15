@@ -1,7 +1,9 @@
 #include "widget.h"
+#include <simpleobject3d.h>
+#include <QOpenGLContext>
 
 Widget::Widget(QWidget *parent)
-    : QOpenGLWidget(parent), m_texture(nullptr), m_indexBuffer(QOpenGLBuffer::IndexBuffer)
+    : QOpenGLWidget(parent)
 {
 }
 
@@ -30,7 +32,6 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
 
     m_rotation = QQuaternion::fromAxisAndAngle(axis, angle) * m_rotation;
-    //m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
     update();
 }
 
@@ -43,6 +44,10 @@ void Widget::initializeGL()
 
     initShaders();
     initCube(2.0f);
+    m_objects[0]->translate(QVector3D(-1.2, 0.0, 0.0));
+
+    initCube(2.0f);
+    m_objects[1]->translate(QVector3D(1.2, 0.0, 0.0));
 }
 
 void Widget::resizeGL(int w, int h)
@@ -61,42 +66,16 @@ void Widget::paintGL()
     viewMatrix.translate(0.0, 0.0, -5.0);
     viewMatrix.rotate(m_rotation);
 
-    QMatrix4x4 modelMatrix;
-    modelMatrix.setToIdentity();
-
-    m_texture->bind(0);
-
     m_program.bind();
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
     m_program.setUniformValue("u_viewMatrix", viewMatrix);
-    m_program.setUniformValue("u_modelMatrix", modelMatrix);
-    m_program.setUniformValue("u_texture", 0);
     m_program.setUniformValue("u_lightPosition", QVector4D(0.0, 0.0, 0.0, 1.0));
     m_program.setUniformValue("u_lightPower", 5.0f);
 
-    m_arrayBuffer.bind();
-
-    int offset = 0;
-
-    int vertLoc = m_program.attributeLocation("a_position");
-    m_program.enableAttributeArray(vertLoc);
-    m_program.setAttributeBuffer(vertLoc, GL_FLOAT, offset, 3, sizeof(VertexData));
-
-    offset += sizeof(QVector3D);
-
-    int texLoc = m_program.attributeLocation("a_texcoord");
-    m_program.enableAttributeArray(texLoc);
-    m_program.setAttributeBuffer(texLoc, GL_FLOAT, offset, 2, sizeof(VertexData));
-
-    offset += sizeof(QVector2D);
-
-    int normLoc = m_program.attributeLocation("a_normal");
-    m_program.enableAttributeArray(normLoc);
-    m_program.setAttributeBuffer(normLoc, GL_FLOAT, offset, 3, sizeof(VertexData));
-
-    m_indexBuffer.bind();
-
-    glDrawElements(GL_TRIANGLES, m_indexBuffer.size(), GL_UNSIGNED_INT, 0);
+    for(int i = 0; i < m_objects.size(); i++)
+    {
+        m_objects[i]->draw(&m_program, context()->functions());
+    }
 }
 
 void Widget::initShaders()
@@ -158,20 +137,7 @@ void Widget::initCube(float width)
         indexes.append(i + 3);
     }
 
-    m_arrayBuffer.create();
-    m_arrayBuffer.bind();
-    m_arrayBuffer.allocate(vertexes.constData(), vertexes.size() * sizeof(VertexData));
-    m_arrayBuffer.release();
-
-    m_indexBuffer.create();
-    m_indexBuffer.bind();
-    m_indexBuffer.allocate(indexes.constData(), indexes.size() * sizeof(GLuint));
-    m_indexBuffer.release();
-
-    m_texture = new QOpenGLTexture(QImage(":/cube.png").mirrored());
-    m_texture->setMinificationFilter(QOpenGLTexture::Nearest);
-    m_texture->setMagnificationFilter(QOpenGLTexture::Linear);
-    m_texture->setWrapMode(QOpenGLTexture::Repeat);
+    m_objects.append(new SimpleObject3D(vertexes, indexes, QImage(":/cube.png")));
 }
 
 
