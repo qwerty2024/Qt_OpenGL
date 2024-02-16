@@ -9,6 +9,8 @@
 #include <QMouseEvent>
 
 class SimpleObject3D;
+class Transformational;
+class Group3D;
 
 class Widget : public QOpenGLWidget
 {
@@ -36,6 +38,9 @@ private:
     QQuaternion m_rotation;
 
     QVector<SimpleObject3D *> m_objects;
+    QVector<Transformational *> m_TransformObject;
+    QVector<Group3D *> m_groups;
+
     float m_z;
 };
 #endif // WIDGET_H
