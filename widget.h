@@ -27,6 +27,7 @@ protected:
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     QMatrix4x4 m_projectionMatrix;
@@ -35,6 +36,7 @@ private:
     QQuaternion m_rotation;
 
     QVector<SimpleObject3D *> m_objects;
+    float m_z;
 };
 #endif // WIDGET_H
 

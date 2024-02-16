@@ -4,6 +4,7 @@
 #include <QOpenGLBuffer>
 #include <QMatrix4x4>
 #include <QVector2D>
+#include <transformational.h>
 
 class QOpenGLTexture;
 class QOpenGLFunctions;
@@ -20,7 +21,7 @@ struct VertexData
     QVector3D normal;
 };
 
-class SimpleObject3D
+class SimpleObject3D : public Transformational
 {
 public:
     SimpleObject3D();
@@ -28,14 +29,22 @@ public:
     ~SimpleObject3D();
 
     void init(const QVector<VertexData> &vertData, const QVector<GLuint> &indexes, const QImage &texture);
+    void rotate(const QQuaternion &r);
+    void translate(const QVector3D &t);
+    void scale(const float &s);
+    void setGlobalTransform(const QMatrix4x4 &g);
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
-    void translate(const QVector3D &translateVector);
+
 
 private:
     QOpenGLBuffer m_vertexBuffer;
     QOpenGLBuffer m_indexBuffer;
-    QMatrix4x4 m_modelMatrix;
     QOpenGLTexture *m_texture;
+
+    QQuaternion m_rotate;
+    QVector3D m_translate;
+    float m_scale;
+    QMatrix4x4 m_globalTransform;
 };
 
 #endif // SIMPLEOBJECT3D_H

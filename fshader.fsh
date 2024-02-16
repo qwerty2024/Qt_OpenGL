@@ -17,13 +17,13 @@ void main(void)
     float specularFactor = 50.0;
     float ambientFactor = 0.1;
 
-    vec4 diffColor = diffMatColor * u_lightPower * max(0.0, dot(v_normal, -lightVect)) / (1.0 + 0.25 * pow(len, 2.0));
+    vec4 diffColor = diffMatColor * u_lightPower * max(0.0, dot(v_normal, -lightVect));// / (1.0 + 0.25 * pow(len, 2.0));
     resultColor += diffColor;
 
     vec4 ambientColor = ambientFactor * diffMatColor;
     resultColor += ambientColor;
 
-    vec4 specularColor = vec4(1.0, 1.0, 1.0, 1.0) * u_lightPower * pow(max(0.0, dot(reflectLight, -eyeVect)), specularFactor) / (1.0 + 0.25 * pow(len, 2.0));
+    vec4 specularColor = vec4(1.0, 1.0, 1.0, 1.0) * u_lightPower * pow(max(0.0, dot(reflectLight, -eyeVect)), specularFactor);// / (1.0 + 0.25 * pow(len, 2.0));
     resultColor += specularColor;
 
     gl_FragColor = resultColor;
