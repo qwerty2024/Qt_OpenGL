@@ -12,6 +12,7 @@
 class SimpleObject3D;
 class Transformational;
 class Group3D;
+class Camera3D;
 
 class Widget : public QOpenGLWidget
 {
@@ -32,18 +33,16 @@ protected:
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     QMatrix4x4 m_projectionMatrix;
     QOpenGLShaderProgram m_program;
     QVector2D m_mousePosition;
-    QQuaternion m_rotation;
 
     QVector<SimpleObject3D *> m_objects;
     QVector<Transformational *> m_TransformObject;
     QVector<Group3D *> m_groups;
-
-    float m_z;
 
     QBasicTimer m_timer;
 
@@ -51,6 +50,8 @@ private:
     float angleGroup1;
     float angleGroup2;
     float angleMain;
+
+    Camera3D *m_camera;
 };
 #endif // WIDGET_H
 

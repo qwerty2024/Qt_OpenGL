@@ -1,17 +1,29 @@
 #include "widget.h"
 #include <simpleobject3d.h>
 #include <QOpenGLContext>
+#include <QKeyEvent>
 #include <group3d.h>
 #include <QtMath>
+#include <camera3d.h>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
-    m_z = -15.0f;
+    m_camera = new Camera3D;
+    m_camera->translate(QVector3D(0.0f, 0.0f, -15.0f));
 }
 
 Widget::~Widget()
 {
+    delete m_camera;
+    for (int i = 0; i < m_objects.size(); i++)
+        delete m_objects[i];
+
+    for (int i = 0; i < m_groups.size(); i++)
+        delete m_groups[i];
+
+    for (int i = 0; i < m_TransformObject.size(); i++)
+        delete m_TransformObject[i];
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -34,7 +46,8 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
 
     QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
 
-    m_rotation = QQuaternion::fromAxisAndAngle(axis, angle) * m_rotation;
+    m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
+
     update();
 }
 
@@ -42,10 +55,10 @@ void Widget::wheelEvent(QWheelEvent *event)
 {
     if (event->delta() > 0)
     {
-        m_z += 0.25f;
+        m_camera->translate(QVector3D(0.0f, 0.0f, 0.25f));
     } else if (event->delta() < 0)
     {
-        m_z -= 0.25f;
+        m_camera->translate(QVector3D(0.0f, 0.0f, -0.25f));
     }
 
     update();
@@ -80,6 +93,33 @@ void Widget::timerEvent(QTimerEvent *event)
     angleGroup2 += M_PI / 360.0f;
     angleMain += M_PI / 720.0f;
 
+    update();
+}
+
+void Widget::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key())
+    {
+        case Qt::Key_Left:
+            m_groups[0]->delObject(m_camera);
+            m_groups[1]->addObject(m_camera);
+            break;
+        case Qt::Key_Right:
+            m_groups[1]->delObject(m_camera);
+            m_groups[0]->addObject(m_camera);
+            break;
+        case Qt::Key_Down:
+            m_groups[0]->delObject(m_camera);
+            m_groups[1]->delObject(m_camera);
+            break;
+        case Qt::Key_Up:
+            m_groups[0]->delObject(m_camera);
+            m_groups[1]->delObject(m_camera);
+            QMatrix4x4 tmp;
+            tmp.setToIdentity();
+            m_camera->setGlobalTransform(tmp);
+            break;
+    }
     update();
 }
 
@@ -133,6 +173,8 @@ void Widget::initializeGL()
 
     m_TransformObject.append(m_groups[2]);
 
+    m_groups[0]->addObject(m_camera);
+
     m_timer.start(30, this);
 }
 
@@ -147,16 +189,12 @@ void Widget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    QMatrix4x4 viewMatrix;
-    viewMatrix.setToIdentity();
-    viewMatrix.translate(0.0, 0.0, m_z);
-    viewMatrix.rotate(m_rotation);
-
     m_program.bind();
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
-    m_program.setUniformValue("u_viewMatrix", viewMatrix);
     m_program.setUniformValue("u_lightPosition", QVector4D(0.0, 0.0, 0.0, 1.0));
     m_program.setUniformValue("u_lightPower", 1.0f);
+
+    m_camera->draw(&m_program);
 
     for(int i = 0; i < m_TransformObject.size(); i++)
     {
