@@ -22,12 +22,14 @@ SOURCES += \
     group3d.cpp \
     main.cpp \
     simpleobject3d.cpp \
+    skybox.cpp \
     widget.cpp
 
 HEADERS += \
     camera3d.h \
     group3d.h \
     simpleobject3d.h \
+    skybox.h \
     transformational.h \
     widget.h
 

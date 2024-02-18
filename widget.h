@@ -13,6 +13,7 @@ class SimpleObject3D;
 class Transformational;
 class Group3D;
 class Camera3D;
+class SkyBox;
 
 class Widget : public QOpenGLWidget
 {
@@ -38,6 +39,7 @@ protected:
 private:
     QMatrix4x4 m_projectionMatrix;
     QOpenGLShaderProgram m_program;
+    QOpenGLShaderProgram m_programSkybox;
     QVector2D m_mousePosition;
 
     QVector<SimpleObject3D *> m_objects;
@@ -52,6 +54,7 @@ private:
     float angleMain;
 
     Camera3D *m_camera;
+    SkyBox *m_skybox;
 };
 #endif // WIDGET_H
 

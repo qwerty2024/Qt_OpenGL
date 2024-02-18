@@ -5,6 +5,7 @@
 #include <group3d.h>
 #include <QtMath>
 #include <camera3d.h>
+#include <skybox.h>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -66,6 +67,8 @@ void Widget::wheelEvent(QWheelEvent *event)
 
 void Widget::timerEvent(QTimerEvent *event)
 {
+    Q_UNUSED(event);
+
     for(int i = 0; i < m_objects.size(); i++)
     {
         if (i % 2 == 0)
@@ -175,6 +178,8 @@ void Widget::initializeGL()
 
     m_groups[0]->addObject(m_camera);
 
+    m_skybox = new SkyBox(100, QImage(":/sky.png"));
+
     m_timer.start(30, this);
 }
 
@@ -182,12 +187,19 @@ void Widget::resizeGL(int w, int h)
 {
     float aspect = w / (h ? (float)h : 1);
     m_projectionMatrix.setToIdentity();
-    m_projectionMatrix.perspective(45, aspect, 0.01f, 100.0f);
+    m_projectionMatrix.perspective(45, aspect, 0.01f, 1000.0f);
 }
 
 void Widget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_programSkybox.bind();
+    m_programSkybox.setUniformValue("u_projectionMatrix", m_projectionMatrix);
+
+    m_camera->draw(&m_programSkybox);
+    m_skybox->draw(&m_programSkybox, context()->functions());
+    m_programSkybox.release();
 
     m_program.bind();
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
@@ -200,10 +212,20 @@ void Widget::paintGL()
     {
         m_TransformObject[i]->draw(&m_program, context()->functions());
     }
+    m_program.release();
 }
 
 void Widget::initShaders()
 {
+    if (!m_programSkybox.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/skybox.vsh"))
+        close();
+
+    if (!m_programSkybox.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/skybox.fsh"))
+        close();
+
+    if (!m_programSkybox.link())
+        close();
+
     if (!m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.vsh"))
         close();
 
