@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>model/material.lib</file>
+        <file>model/my_obj.obj</file>
+        <file>model/sh_lowaTibetGT_normal_norm.jpg</file>
+        <file>model/sh_lowaTibetGT_occlusion_occl.jpg</file>
+        <file>model/texturka.jpg</file>
+    </qresource>
+</RCC>

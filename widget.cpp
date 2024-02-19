@@ -69,7 +69,7 @@ void Widget::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    for(int i = 0; i < m_objects.size(); i++)
+    for(int i = 0; i < m_objects.size() - 1; i++)
     {
         if (i % 2 == 0)
         {
@@ -151,7 +151,7 @@ void Widget::initializeGL()
         }
     }
 
-    m_groups[0]->translate(QVector3D(-4.0f, 0.0f, 0.0f));
+    m_groups[0]->translate(QVector3D(-8.0f, 0.0f, 0.0f));
 
 
     m_groups.append(new Group3D);
@@ -168,13 +168,16 @@ void Widget::initializeGL()
         }
     }
 
-    m_groups[1]->translate(QVector3D(4.0f, 0.0f, 0.0f));
+    m_groups[1]->translate(QVector3D(8.0f, 0.0f, 0.0f));
 
     m_groups.append(new Group3D);
     m_groups[2]->addObject(m_groups[0]);
     m_groups[2]->addObject(m_groups[1]);
 
     m_TransformObject.append(m_groups[2]);
+
+    loadObj(":/model/my_obj.obj");
+    m_TransformObject.append(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->addObject(m_camera);
 
@@ -282,6 +285,71 @@ void Widget::initCube(float width)
         indexes.append(i + 1);
         indexes.append(i + 3);
     }
+
+    m_objects.append(new SimpleObject3D(vertexes, indexes, QImage(":/cube.png")));
+}
+
+void Widget::loadObj(const QString &path)
+{
+    QFile objFile(path);
+    if (!objFile.exists())
+    {
+        qDebug() << "File not found!";
+        return;
+    }
+
+    objFile.open(QIODevice::ReadOnly);
+    QTextStream input(&objFile);
+
+    QVector<QVector3D> coords;
+    QVector<QVector2D> texCoord;
+    QVector<QVector3D> normals;
+
+    QVector<VertexData> vertexes;
+    QVector<GLuint> indexes;
+
+    while (!input.atEnd())
+    {
+        QString str = input.readLine();
+        QStringList list = str.split(" ");
+        if (list[0] == "#")
+        {
+            qDebug() << "This is comment: " << str;
+            continue;
+        } else if (list[0] == "mtllib")
+        {
+            qDebug() << "This is material: " << str;
+            continue;
+
+        } else if (list[0] == "v")
+        {
+            coords.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()) / 10.0f); // временно уменьшил размер в 10 раз
+            continue;
+
+        } else if (list[0] == "vt")
+        {
+            //texCoord.append(QVector2D(list[1].toFloat(), list[2].toFloat()));
+            continue;
+
+        } else if (list[0] == "vn")
+        {
+            normals.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()));
+            continue;
+
+        } else if (list[0] == "f")
+        {
+            for (int i = 1; i <= 3; i++)
+            {
+                QStringList vert = list[i].split("/");
+                //vertexes.append(VertexData(coords[vert[0].toLong() - 1], texCoord[vert[0].toLong() - 1], normals[vert[2].toLong() - 1]));
+                vertexes.append(VertexData(coords[vert[0].toLong() - 1], QVector2D(1.0f, 1.0f), normals[vert[2].toLong() - 1])); // пока без текстурных координат
+                indexes.append(indexes.size());
+            }
+            continue;
+        }
+    }
+
+    objFile.close();
 
     m_objects.append(new SimpleObject3D(vertexes, indexes, QImage(":/cube.png")));
 }

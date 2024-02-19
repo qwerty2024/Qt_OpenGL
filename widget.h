@@ -29,6 +29,7 @@ protected:
     void paintGL() override;
     void initShaders();
     void initCube(float width);
+    void loadObj(const QString &path);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
