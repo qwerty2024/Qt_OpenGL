@@ -21,6 +21,8 @@ SOURCES += \
     camera3d.cpp \
     group3d.cpp \
     main.cpp \
+    material.cpp \
+    materiallibrary.cpp \
     simpleobject3d.cpp \
     skybox.cpp \
     widget.cpp
@@ -28,6 +30,8 @@ SOURCES += \
 HEADERS += \
     camera3d.h \
     group3d.h \
+    material.h \
+    materiallibrary.h \
     simpleobject3d.h \
     skybox.h \
     transformational.h \

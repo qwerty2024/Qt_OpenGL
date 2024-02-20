@@ -10,5 +10,5 @@ newmtl sh_lowaTibetGT
 	Pm 0
 	d 1
 	Tr 0
-	map_Kd sh_lowaTibetGT_diffuse_scale0.jpg
+        map_Kd texturka.jpg
 	norm sh_lowaTibetGT_normal_norm.jpg

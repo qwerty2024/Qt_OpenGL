@@ -22,9 +22,6 @@ Widget::~Widget()
 
     for (int i = 0; i < m_groups.size(); i++)
         delete m_groups[i];
-
-    for (int i = 0; i < m_TransformObject.size(); i++)
-        delete m_TransformObject[i];
 }
 
 void Widget::mousePressEvent(QMouseEvent *event)
@@ -312,6 +309,7 @@ void Widget::loadObj(const QString &path)
     {
         QString str = input.readLine();
         QStringList list = str.split(" ");
+
         if (list[0] == "#")
         {
             qDebug() << "This is comment: " << str;
