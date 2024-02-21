@@ -9,11 +9,11 @@
 #include <QMouseEvent>
 #include <QBasicTimer>
 
-class SimpleObject3D;
 class Transformational;
 class Group3D;
 class Camera3D;
 class SkyBox;
+class ObjectEngine3D;
 
 class Widget : public QOpenGLWidget
 {
@@ -29,7 +29,6 @@ protected:
     void paintGL() override;
     void initShaders();
     void initCube(float width);
-    void loadObj(const QString &path);
 
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -43,7 +42,7 @@ private:
     QOpenGLShaderProgram m_programSkybox;
     QVector2D m_mousePosition;
 
-    QVector<SimpleObject3D *> m_objects;
+    QVector<ObjectEngine3D *> m_objects;
     QVector<Transformational *> m_TransformObject;
     QVector<Group3D *> m_groups;
 

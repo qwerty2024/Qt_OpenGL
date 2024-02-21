@@ -24,7 +24,7 @@ void MaterialLibrary::addMaterial(Material *material)
 
 Material *MaterialLibrary::getMaterial(quint32 index)
 {
-    if (index <= (quint32)m_materials.size())
+    if (index < (quint32)m_materials.size())
         return m_materials[index];
     else
         return nullptr;
@@ -35,7 +35,7 @@ Material *MaterialLibrary::getMaterial(const QString &mtlName)
     for (int i = 0; i < m_materials.size(); i++)
     {
         if (m_materials[i]->mtlName() == mtlName)
-            m_materials[i];
+            return m_materials[i];
     }
 
     return nullptr;
@@ -101,8 +101,8 @@ void MaterialLibrary::loadMaterialsFromFile(const QString &filename)
             continue;
         } else if (list[0] == "map_Kd")
         {
-            //newMtl->setDiffuseMap(QString("%1/%2").arg(fileInfo.absolutePath()).arg(list[1]));
-            newMtl->setDiffuseMap(":/model/" + list[1]);
+            newMtl->setDiffuseMap(QString("%1/%2").arg(fileInfo.absolutePath()).arg(list[1]));
+            //newMtl->setDiffuseMap(":/model/" + list[1]);
             continue;
         }
     }

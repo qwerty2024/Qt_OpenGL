@@ -1,11 +1,12 @@
 #include "widget.h"
-#include <simpleobject3d.h>
+#include <objectengine3d.h>
 #include <QOpenGLContext>
 #include <QKeyEvent>
 #include <group3d.h>
 #include <QtMath>
 #include <camera3d.h>
 #include <skybox.h>
+#include <material.h>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -173,7 +174,8 @@ void Widget::initializeGL()
 
     m_TransformObject.append(m_groups[2]);
 
-    loadObj(":/model/my_obj.obj");
+    m_objects.append(new ObjectEngine3D);
+    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
     m_TransformObject.append(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->addObject(m_camera);
@@ -283,76 +285,18 @@ void Widget::initCube(float width)
         indexes.append(i + 3);
     }
 
-    m_objects.append(new SimpleObject3D(vertexes, indexes, QImage(":/cube.png")));
+    Material *newMtl = new Material;
+    newMtl->setDiffuseMap(":/cube.png");
+    newMtl->setShinnes(96);
+    newMtl->setDiffuseColor(QVector3D(1.0f, 1.0f, 1.0f));
+    newMtl->setAmbienceColor(QVector3D(1.0f, 1.0f, 1.0f));
+    newMtl->setSpecularColor(QVector3D(1.0f, 1.0f, 1.0f));
+
+    ObjectEngine3D *newObj = new ObjectEngine3D;
+    newObj->addObject(new SimpleObject3D(vertexes, indexes, newMtl));
+
+    m_objects.append(newObj);
 }
-
-void Widget::loadObj(const QString &path)
-{
-    QFile objFile(path);
-    if (!objFile.exists())
-    {
-        qDebug() << "File not found!";
-        return;
-    }
-
-    objFile.open(QIODevice::ReadOnly);
-    QTextStream input(&objFile);
-
-    QVector<QVector3D> coords;
-    QVector<QVector2D> texCoord;
-    QVector<QVector3D> normals;
-
-    QVector<VertexData> vertexes;
-    QVector<GLuint> indexes;
-
-    while (!input.atEnd())
-    {
-        QString str = input.readLine();
-        QStringList list = str.split(" ");
-
-        if (list[0] == "#")
-        {
-            qDebug() << "This is comment: " << str;
-            continue;
-        } else if (list[0] == "mtllib")
-        {
-            qDebug() << "This is material: " << str;
-            continue;
-
-        } else if (list[0] == "v")
-        {
-            coords.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()) / 10.0f); // временно уменьшил размер в 10 раз
-            continue;
-
-        } else if (list[0] == "vt")
-        {
-            //texCoord.append(QVector2D(list[1].toFloat(), list[2].toFloat()));
-            continue;
-
-        } else if (list[0] == "vn")
-        {
-            normals.append(QVector3D(list[1].toFloat(), list[2].toFloat(), list[3].toFloat()));
-            continue;
-
-        } else if (list[0] == "f")
-        {
-            for (int i = 1; i <= 3; i++)
-            {
-                QStringList vert = list[i].split("/");
-                //vertexes.append(VertexData(coords[vert[0].toLong() - 1], texCoord[vert[0].toLong() - 1], normals[vert[2].toLong() - 1]));
-                vertexes.append(VertexData(coords[vert[0].toLong() - 1], QVector2D(1.0f, 1.0f), normals[vert[2].toLong() - 1])); // пока без текстурных координат
-                indexes.append(indexes.size());
-            }
-            continue;
-        }
-    }
-
-    objFile.close();
-
-    m_objects.append(new SimpleObject3D(vertexes, indexes, QImage(":/cube.png")));
-}
-
-
 
 
 

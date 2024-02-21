@@ -20,6 +20,7 @@ public:
     void setShinnes(const qreal &shinnes);
     const qreal &shinnes() const;
     void setDiffuseMap(const QString &filename);
+    void setDiffuseMap(const QImage &imageFile);
     const QImage &diffuseMap() const;
 
 private:

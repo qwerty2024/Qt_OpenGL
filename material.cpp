@@ -60,6 +60,11 @@ void Material::setDiffuseMap(const QString &filename)
     m_diffuseMap = QImage(filename);
 }
 
+void Material::setDiffuseMap(const QImage &imageFile)
+{
+    m_diffuseMap = imageFile;
+}
+
 const QImage &Material::diffuseMap() const
 {
     return m_diffuseMap;

@@ -1,5 +1,6 @@
 #include "skybox.h"
 #include <simpleobject3d.h>
+#include <material.h>
 
 SkyBox::SkyBox(float width, const QImage &texture)
 {
@@ -48,7 +49,14 @@ SkyBox::SkyBox(float width, const QImage &texture)
         indexes.append(i + 1);
     }
 
-    m_cube = new SimpleObject3D(vertexes, indexes, texture);
+    Material *newMtl = new Material;
+    newMtl->setDiffuseMap(":/sky.png");
+    newMtl->setShinnes(96);
+    newMtl->setDiffuseColor(QVector3D(1.0f, 1.0f, 1.0f));
+    newMtl->setAmbienceColor(QVector3D(1.0f, 1.0f, 1.0f));
+    newMtl->setSpecularColor(QVector3D(1.0f, 1.0f, 1.0f));
+
+    m_cube = new SimpleObject3D(vertexes, indexes, newMtl);
 }
 
 SkyBox::~SkyBox()

@@ -23,6 +23,7 @@ SOURCES += \
     main.cpp \
     material.cpp \
     materiallibrary.cpp \
+    objectengine3d.cpp \
     simpleobject3d.cpp \
     skybox.cpp \
     widget.cpp
@@ -32,6 +33,7 @@ HEADERS += \
     group3d.h \
     material.h \
     materiallibrary.h \
+    objectengine3d.h \
     simpleobject3d.h \
     skybox.h \
     transformational.h \
