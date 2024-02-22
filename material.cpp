@@ -2,7 +2,7 @@
 
 Material::Material()
 {
-
+    m_isUsingDiffuseMap = false;
 }
 
 void Material::setName(const QString &mtlName)
@@ -45,12 +45,12 @@ const QVector3D &Material::specularColor() const
     return m_specularColor;
 }
 
-void Material::setShinnes(const qreal &shinnes)
+void Material::setShinnes(const float &shinnes)
 {
     m_shinnes = shinnes;
 }
 
-const qreal &Material::shinnes() const
+const float &Material::shinnes() const
 {
     return m_shinnes;
 }
@@ -58,14 +58,21 @@ const qreal &Material::shinnes() const
 void Material::setDiffuseMap(const QString &filename)
 {
     m_diffuseMap = QImage(filename);
+    m_isUsingDiffuseMap = true;
 }
 
 void Material::setDiffuseMap(const QImage &imageFile)
 {
     m_diffuseMap = imageFile;
+    m_isUsingDiffuseMap = true;
 }
 
 const QImage &Material::diffuseMap() const
 {
     return m_diffuseMap;
+}
+
+bool Material::isUsingDiffuseMap() const
+{
+    return m_isUsingDiffuseMap;
 }

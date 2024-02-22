@@ -293,7 +293,7 @@ void Widget::initCube(float width)
 
     Material *newMtl = new Material;
     newMtl->setDiffuseMap(":/cube.png");
-    newMtl->setShinnes(96);
+    newMtl->setShinnes(100);
     newMtl->setDiffuseColor(QVector3D(1.0f, 1.0f, 1.0f));
     newMtl->setAmbienceColor(QVector3D(1.0f, 1.0f, 1.0f));
     newMtl->setSpecularColor(QVector3D(1.0f, 1.0f, 1.0f));
