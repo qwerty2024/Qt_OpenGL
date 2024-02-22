@@ -5,5 +5,9 @@
         <file>model/shadow_bibika.jpeg</file>
         <file>model/text_bibika.jpeg</file>
         <file>model/normal_optimised.jpeg</file>
+        <file>model/cube.mtl</file>
+        <file>model/cube.obj</file>
+        <file>model/cube1.png</file>
+        <file>model/cube2.png</file>
     </qresource>
 </RCC>

@@ -175,7 +175,13 @@ void Widget::initializeGL()
     m_TransformObject.append(m_groups[2]);
 
     m_objects.append(new ObjectEngine3D);
+    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/cube.obj");
+    m_TransformObject.append(m_objects[m_objects.size() - 1]);
+
+    m_objects.append(new ObjectEngine3D);
     m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
+    m_objects[m_objects.size() - 1]->translate(QVector3D(2.0f, 2.0f, 2.0f));
+    m_objects[m_objects.size() - 1]->scale(3.0f);
     m_TransformObject.append(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->addObject(m_camera);
