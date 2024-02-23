@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>cube.png</file>
         <file>sky.png</file>
+        <file>cube_normal.jpg</file>
     </qresource>
 </RCC>

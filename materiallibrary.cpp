@@ -102,7 +102,10 @@ void MaterialLibrary::loadMaterialsFromFile(const QString &filename)
         } else if (list[0] == "map_Kd")
         {
             newMtl->setDiffuseMap(QString("%1/%2").arg(fileInfo.absolutePath()).arg(list[1]));
-            //newMtl->setDiffuseMap(":/model/" + list[1]);
+            continue;
+        } else if (list[0] == "map_Bump")
+        {
+            newMtl->setNormalMap(QString("%1/%2").arg(fileInfo.absolutePath()).arg(list[1]));
             continue;
         }
     }

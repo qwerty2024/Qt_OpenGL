@@ -19,10 +19,16 @@ public:
     const QVector3D &specularColor() const;
     void setShinnes(const float &shinnes);
     const float &shinnes() const;
+
     void setDiffuseMap(const QString &filename);
     void setDiffuseMap(const QImage &imageFile);
     const QImage &diffuseMap() const;
     bool isUsingDiffuseMap() const;
+
+    void setNormalMap(const QString &filename);
+    void setNormalMap(const QImage &imageFile);
+    const QImage &normalMap() const;
+    bool isUsingNormalMap() const;
 
 private:
     QString m_mtlName;
@@ -31,7 +37,9 @@ private:
     QVector3D m_specularColor;
     float m_shinnes;
     QImage m_diffuseMap;
+    QImage m_normalMap;
     bool m_isUsingDiffuseMap;
+    bool m_isUsingNormalMap;
 
 };
 

@@ -3,6 +3,7 @@
 Material::Material()
 {
     m_isUsingDiffuseMap = false;
+    m_isUsingNormalMap = false;
 }
 
 void Material::setName(const QString &mtlName)
@@ -75,4 +76,26 @@ const QImage &Material::diffuseMap() const
 bool Material::isUsingDiffuseMap() const
 {
     return m_isUsingDiffuseMap;
+}
+
+void Material::setNormalMap(const QString &filename)
+{
+    m_normalMap = QImage(filename);
+    m_isUsingNormalMap = true;
+}
+
+void Material::setNormalMap(const QImage &imageFile)
+{
+    m_normalMap = imageFile;
+    m_isUsingNormalMap = true;
+}
+
+const QImage &Material::normalMap() const
+{
+    return m_normalMap;
+}
+
+bool Material::isUsingNormalMap() const
+{
+    return m_isUsingNormalMap;
 }

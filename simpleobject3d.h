@@ -20,6 +20,8 @@ struct VertexData
     QVector3D position;
     QVector2D texCoord;
     QVector3D normal;
+    QVector3D tangent;
+    QVector3D bitangent;
 };
 
 class SimpleObject3D : public Transformational
@@ -37,10 +39,14 @@ public:
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
 
 
+    QOpenGLTexture *normaleMap() const;
+    void setNormaleMap(QOpenGLTexture *normaleMap);
+
 private:
     QOpenGLBuffer m_vertexBuffer;
     QOpenGLBuffer m_indexBuffer;
-    QOpenGLTexture *m_texture;
+    QOpenGLTexture *m_diffuseMap;
+    QOpenGLTexture *m_normalMap;
 
     QQuaternion m_rotate;
     QVector3D m_translate;

@@ -12,6 +12,7 @@ public:
     void loadObjectFromFile(const QString &filename);
     void addObject(SimpleObject3D *object);
     SimpleObject3D *getObject(quint32 index);
+    void calculateTBN(QVector<VertexData> &vertData);
     void rotate(const QQuaternion &r);
     void translate(const QVector3D &t);
     void scale(const float &s);

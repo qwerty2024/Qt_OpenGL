@@ -11,6 +11,7 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd cube1.png
+map_Bump cube1.png
 
 newmtl Material2
 Ns 96.078431
@@ -22,4 +23,5 @@ Ni 1.000000
 d 1.000000
 illum 2
 map_Kd cube2.png
+map_Bump cube2.png
 

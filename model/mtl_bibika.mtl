@@ -10,6 +10,7 @@ Ni 1
 d 1
 illum 2
 map_Kd text_bibika.jpeg
+map_Bump normal_optimised.jpeg
 
 newmtl mat1
 Ns 250
