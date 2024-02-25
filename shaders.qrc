@@ -4,5 +4,7 @@
         <file>vshader.vsh</file>
         <file>skybox.vsh</file>
         <file>skybox.fsh</file>
+        <file>depth.vsh</file>
+        <file>depth.fsh</file>
     </qresource>
 </RCC>

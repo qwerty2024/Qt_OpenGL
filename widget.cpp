@@ -7,12 +7,30 @@
 #include <camera3d.h>
 #include <skybox.h>
 #include <material.h>
+#include <QOpenGLFramebufferObject>
+#include <QOpenGLFunctions>
+
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
     m_camera = new Camera3D;
     m_camera->translate(QVector3D(0.0f, 0.0f, -15.0f));
+    m_fbHeight = 1024;
+    m_fbWidth = 1024;
+
+    m_projectionLightMatrix.setToIdentity();
+    m_projectionLightMatrix.ortho(-40, 40, -40, 40, -40, 40);
+
+    m_lightRotateX = 30;
+    m_lightRotateY = 40;
+    m_shadowLightMatrix.setToIdentity();
+    m_shadowLightMatrix.rotate(m_lightRotateX, 1.0f, 0.0f, 0.0f);
+    m_shadowLightMatrix.rotate(m_lightRotateY, 0.0f, 1.0f, 0.0f);
+
+    m_lightMatrix.setToIdentity();
+    m_lightMatrix.rotate(-m_lightRotateY, 0.0f, 1.0f, 0.0f);
+    m_lightMatrix.rotate(-m_lightRotateX, 1.0f, 0.0f, 0.0f);
 }
 
 Widget::~Widget()
@@ -67,7 +85,7 @@ void Widget::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    for(int i = 0; i < m_objects.size() - 1; i++)
+    for(int i = 0; i < m_objects.size() - 3; i++)
     {
         if (i % 2 == 0)
         {
@@ -135,6 +153,9 @@ void Widget::initializeGL()
 
     float step = 2.0f;
 
+    QImage diffuseMap(":/cube.png");
+    QImage normalMap(":/cube_normal.jpg");
+
     m_groups.append(new Group3D);
     for (float x = -step; x <= step; x+= step)
     {
@@ -142,7 +163,7 @@ void Widget::initializeGL()
         {
             for (float z = -step; z <= step; z+= step)
             {
-                initCube(1.0f);
+                initCube(1.0f, 1.0f, 1.0f, &diffuseMap, &normalMap);
                 m_objects[m_objects.size() - 1]->translate(QVector3D(x, y, z));
                 m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
             }
@@ -159,7 +180,7 @@ void Widget::initializeGL()
         {
             for (float z = -step; z <= step; z+= step)
             {
-                initCube(1.0f);
+                initCube(1.0f, 1.0f, 1.0f, &diffuseMap, &normalMap);
                 m_objects[m_objects.size() - 1]->translate(QVector3D(x, y, z));
                 m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
             }
@@ -184,11 +205,15 @@ void Widget::initializeGL()
     m_objects[m_objects.size() - 1]->translate(QVector3D(2.0f, 2.0f, 2.0f));
     m_TransformObject.append(m_objects[m_objects.size() - 1]);
 
-
+    initCube(40.0f, 2.0f, 40.0f, &diffuseMap);
+    m_objects[m_objects.size() - 1]->translate(QVector3D(0.0f, -2.0f, 0.0f));
+    m_TransformObject.append(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->addObject(m_camera);
 
     m_skybox = new SkyBox(100, QImage(":/sky.png"));
+
+    m_depthBuffer = new QOpenGLFramebufferObject(m_fbWidth, m_fbHeight, QOpenGLFramebufferObject::Depth);
 
     m_timer.start(30, this);
 }
@@ -202,6 +227,30 @@ void Widget::resizeGL(int w, int h)
 
 void Widget::paintGL()
 {
+    // Отрисовка во фрейм буфер
+    m_depthBuffer->bind();
+
+    glViewport(0, 0, m_fbWidth, m_fbHeight);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    m_programDepth.bind();
+    m_programDepth.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
+    m_programDepth.setUniformValue("u_shadowLightMatrix", m_shadowLightMatrix);
+
+    for(int i = 0; i < m_TransformObject.size(); i++)
+    {
+        m_TransformObject[i]->draw(&m_programDepth, context()->functions());
+    }
+
+    m_depthBuffer->release();
+
+    GLuint texture = m_depthBuffer->texture();
+
+    context()->functions()->glActiveTexture(GL_TEXTURE4);
+    context()->functions()->glBindTexture(GL_TEXTURE_2D, texture);
+
+    // Отрисовка на экран
+    glViewport(0, 0, width(), height());
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     m_programSkybox.bind();
@@ -212,8 +261,12 @@ void Widget::paintGL()
     m_programSkybox.release();
 
     m_program.bind();
+    m_program.setUniformValue("u_shadowMap", GL_TEXTURE4 - GL_TEXTURE0);
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
-    m_program.setUniformValue("u_lightPosition", QVector4D(0.0, 0.0, 0.0, 1.0));
+    m_program.setUniformValue("u_lightDirection", QVector4D(0.0, 0.0, -1.0, 0.0));
+    m_program.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
+    m_program.setUniformValue("u_shadowLightMatrix", m_shadowLightMatrix);
+    m_program.setUniformValue("u_lightMatrix", m_lightMatrix);
     m_program.setUniformValue("u_lightPower", 1.0f);
 
     m_camera->draw(&m_program);
@@ -244,13 +297,22 @@ void Widget::initShaders()
 
     if (!m_program.link())
         close();
+
+    if (!m_programDepth.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/depth.vsh"))
+        close();
+
+    if (!m_programDepth.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/depth.fsh"))
+        close();
+
+    if (!m_programDepth.link())
+        close();
 }
 
-void Widget::initCube(float width)
+void Widget::initCube(float width, float height, float depth, QImage *diffuseMap, QImage *normalMap)
 {
     float width_div_2 = width / 2.0f;
-    float height_div_2 = width / 2.0f;
-    float depth_div_2 = width / 2.0f;
+    float height_div_2 = height / 2.0f;
+    float depth_div_2 = depth / 2.0f;
 
     QVector<VertexData> vertexes;
     vertexes.append(VertexData(QVector3D(-width_div_2, height_div_2, depth_div_2), QVector2D(0.0f, 1.0f), QVector3D(0.0f, 0.0f, 1.0f)));
@@ -299,8 +361,10 @@ void Widget::initCube(float width)
     for(GLuint i = 0; i < 36; ++i) indexes.append(i);
 
     Material *newMtl = new Material;
-    newMtl->setDiffuseMap(":/cube.png");
-    newMtl->setNormalMap(":/cube_normal.jpg");
+    if (diffuseMap)
+        newMtl->setDiffuseMap(*diffuseMap);
+    if (normalMap)
+        newMtl->setNormalMap(*normalMap);
     newMtl->setShinnes(96);
     newMtl->setDiffuseColor(QVector3D(1.0f, 1.0f, 1.0f));
     newMtl->setAmbienceColor(QVector3D(1.0f, 1.0f, 1.0f));
