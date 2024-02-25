@@ -151,42 +151,22 @@ void Widget::initializeGL()
 
     initShaders();
 
-    float step = 2.0f;
+    m_groups.append(new Group3D);
 
-    QImage diffuseMap(":/cube.png");
-    QImage normalMap(":/cube_normal.jpg");
+    m_objects.append(new ObjectEngine3D);
+    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
+    m_objects[m_objects.size() - 1]->scale(3.0f);
+
+    m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
+
+    m_objects.append(new ObjectEngine3D);
+    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
+    m_objects[m_objects.size() - 1]->scale(3.0f);
 
     m_groups.append(new Group3D);
-    for (float x = -step; x <= step; x+= step)
-    {
-        for (float y = -step; y <= step; y+= step)
-        {
-            for (float z = -step; z <= step; z+= step)
-            {
-                initCube(1.0f, 1.0f, 1.0f, &diffuseMap, &normalMap);
-                m_objects[m_objects.size() - 1]->translate(QVector3D(x, y, z));
-                m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
-            }
-        }
-    }
+    m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->translate(QVector3D(-8.0f, 0.0f, 0.0f));
-
-
-    m_groups.append(new Group3D);
-    for (float x = -step; x <= step; x+= step)
-    {
-        for (float y = -step; y <= step; y+= step)
-        {
-            for (float z = -step; z <= step; z+= step)
-            {
-                initCube(1.0f, 1.0f, 1.0f, &diffuseMap, &normalMap);
-                m_objects[m_objects.size() - 1]->translate(QVector3D(x, y, z));
-                m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
-            }
-        }
-    }
-
     m_groups[1]->translate(QVector3D(8.0f, 0.0f, 0.0f));
 
     m_groups.append(new Group3D);
@@ -195,21 +175,20 @@ void Widget::initializeGL()
 
     m_TransformObject.append(m_groups[2]);
 
-    m_objects.append(new ObjectEngine3D);
-    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
-    m_objects[m_objects.size() - 1]->scale(3.0f);
-    m_TransformObject.append(m_objects[m_objects.size() - 1]);
+    m_groups.append(new Group3D);
+    QImage diffuseMapCube(":/cube.png");
+    QImage normalMapCube(":/cube_normal.jpg");
+    initCube(2.0f, 2.0f, 2.0f, &diffuseMapCube, &normalMapCube);
+    m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
 
-    m_objects.append(new ObjectEngine3D);
-    m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/cube.obj");
-    m_objects[m_objects.size() - 1]->translate(QVector3D(2.0f, 2.0f, 2.0f));
-    m_TransformObject.append(m_objects[m_objects.size() - 1]);
+    m_groups[m_groups.size() - 1]->addObject(m_camera);
 
+    m_TransformObject.append(m_groups[3]);
+
+    QImage diffuseMap(":/ground.jpg");
     initCube(40.0f, 2.0f, 40.0f, &diffuseMap);
     m_objects[m_objects.size() - 1]->translate(QVector3D(0.0f, -2.0f, 0.0f));
     m_TransformObject.append(m_objects[m_objects.size() - 1]);
-
-    m_groups[0]->addObject(m_camera);
 
     m_skybox = new SkyBox(100, QImage(":/sky.png"));
 
