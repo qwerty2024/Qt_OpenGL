@@ -28,11 +28,43 @@ float SampleShadowMap(sampler2D map, vec2 coords, float compare)
     return step(compare, value);
 }
 
+float SampleShadowMapLinear(sampler2D map, vec2 coords, float compare, vec2 texelSize)
+{
+    vec2 pixelPos = coords / texelSize + 0.5f;
+    vec2 fractPart = fract(pixelPos);
+    vec2 startTexel = (pixelPos - fractPart) * texelSize;
+
+    float blTexel = SampleShadowMap(map, startTexel, compare);
+    float brTexel = SampleShadowMap(map, startTexel + vec2(texelSize.x, 0.0f), compare);
+    float tlTexel = SampleShadowMap(map, startTexel + vec2(0.0f, texelSize.y), compare);
+    float trTexel = SampleShadowMap(map, startTexel + texelSize, compare);
+
+    float mixA = mix(blTexel, tlTexel, fractPart.y);
+    float mixB = mix(brTexel, trTexel, fractPart.y);
+
+    return mix(mixA, mixB, fractPart.x);
+}
+
+float SampleShadowMapPCF(sampler2D map, vec2 coords, float compare, vec2 texelSize)
+{
+    float result = 0.0f;
+    for (float y = -1.0f; y < 1.0f; y+= 1.0f)
+    {
+        for (float x = -1.0f; x < 1.0f; x+= 1.0f)
+        {
+            vec2 offset = vec2(x, y) * texelSize;
+            result += SampleShadowMapLinear(map, coords + offset, compare, texelSize);
+        }
+    }
+
+    return result / 9.0f;
+}
+
 float CalcShadowAmount(sampler2D map, vec4 initialShadowCoords)
 {
     vec3 tmp = v_positionLightMatrix.xyz / v_positionLightMatrix.w;
     tmp = tmp * vec3(0.5f) + vec3(0.5f);
-    return SampleShadowMap(u_shadowMap, tmp.xy, tmp.z * 255.0f - 0.5f);
+    return SampleShadowMapPCF(u_shadowMap, tmp.xy, tmp.z * 255.0f - 0.5f, vec2(1.0f / 1024.0f));
 }
 
 void main(void)
