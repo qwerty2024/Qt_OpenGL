@@ -64,7 +64,10 @@ float CalcShadowAmount(sampler2D map, vec4 initialShadowCoords)
 {
     vec3 tmp = v_positionLightMatrix.xyz / v_positionLightMatrix.w;
     tmp = tmp * vec3(0.5f) + vec3(0.5f);
-    return SampleShadowMapPCF(u_shadowMap, tmp.xy, tmp.z * 255.0f - 0.5f, vec2(1.0f / 1024.0f));
+    float offset = 2.0;
+    offset *= dot(v_normal, v_lightDirection.xyz);
+
+    return SampleShadowMapPCF(u_shadowMap, tmp.xy, tmp.z * 255.0f + offset, vec2(1.0f / 1024.0f));
 }
 
 void main(void)
