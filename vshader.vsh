@@ -9,16 +9,17 @@ uniform highp mat4 u_modelMatrix;
 
 uniform highp mat4 u_projectionLightMatrix;
 uniform highp mat4 u_shadowLightMatrix;
-uniform highp mat4 u_lightMatrix;
+//uniform highp mat4 u_lightMatrix;
 
-uniform highp vec4 u_lightDirection;
+//uniform highp vec4 u_lightDirection;
 
 varying highp vec4 v_position;
 varying highp vec2 v_texcoord;
 varying highp vec3 v_normal;
 varying highp mat3 v_tbnMatrix;
-varying highp vec4 v_lightDirection;
+//varying highp vec4 v_lightDirection;
 varying highp vec4 v_positionLightMatrix;
+varying highp mat4 v_viewMatrix;
 
 highp mat3 transpose(in highp mat3 inMatrix)
 {
@@ -51,5 +52,6 @@ void main(void)
     v_tbnMatrix = transpose(mat3(tangent, bitangent, normal));
 
     v_positionLightMatrix = u_projectionLightMatrix * u_shadowLightMatrix * u_modelMatrix * a_position;
-    v_lightDirection = u_viewMatrix * u_lightMatrix * u_lightDirection;
+    //v_lightDirection = u_viewMatrix * u_lightMatrix * u_lightDirection;
+    v_viewMatrix = u_viewMatrix;
 }

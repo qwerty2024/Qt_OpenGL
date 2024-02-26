@@ -6,20 +6,37 @@ struct materialProperty
     float shinnes;
 };
 
+struct lightProperty
+{
+    vec3 diffuseColor;
+    vec3 ambienceColor;
+    vec3 specularColor;
+    vec4 position;
+    vec4 direction;
+    float cutoff;
+    int type;
+};
+
 uniform sampler2D u_diffuseMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_shadowMap;
+
 uniform highp vec4 u_lightPosition;
 uniform highp float u_lightPower;
 uniform highp materialProperty u_materialProperty;
 uniform bool u_isUsingDiffuseMap;
 uniform bool u_isUsingNormalMap;
+//uniform highp vec4 u_lightDirection;
+uniform lightProperty u_lightProperty;
+
 varying highp vec4 v_position;
 varying highp vec2 v_texcoord;
 varying highp vec3 v_normal;
 varying highp mat3 v_tbnMatrix;
-varying highp vec4 v_lightDirection;
+//varying highp vec4 v_lightDirection;
 varying highp vec4 v_positionLightMatrix;
+varying highp mat4 v_viewMatrix;
+lightProperty v_lightProperty;
 
 float SampleShadowMap(sampler2D map, vec2 coords, float compare)
 {
@@ -64,14 +81,22 @@ float CalcShadowAmount(sampler2D map, vec4 initialShadowCoords)
 {
     vec3 tmp = v_positionLightMatrix.xyz / v_positionLightMatrix.w;
     tmp = tmp * vec3(0.5f) + vec3(0.5f);
-    float offset = 2.0;
-    offset *= dot(v_normal, v_lightDirection.xyz);
+    float offset = 2.0f;
+    offset *= dot(v_normal, v_lightProperty.direction.xyz);
 
     return SampleShadowMapPCF(u_shadowMap, tmp.xy, tmp.z * 255.0f + offset, vec2(1.0f / 1024.0f));
 }
 
 void main(void)
 {
+    v_lightProperty.ambienceColor = u_lightProperty.ambienceColor;
+    v_lightProperty.diffuseColor = u_lightProperty.diffuseColor;
+    v_lightProperty.specularColor = u_lightProperty.specularColor;
+    v_lightProperty.cutoff = u_lightProperty.cutoff;
+    v_lightProperty.type = u_lightProperty.type;
+    v_lightProperty.direction = v_viewMatrix * u_lightProperty.direction;
+    v_lightProperty.position = v_viewMatrix * u_lightProperty.position;
+
     highp float shadowCoef = CalcShadowAmount(u_shadowMap, v_positionLightMatrix);
     vec4 resultColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
     vec4 eyePosition = vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -83,7 +108,19 @@ void main(void)
     vec3 eyeVect = normalize(v_position.xyz - eyePosition.xyz);
     if (u_isUsingNormalMap == true) eyeVect = normalize(v_tbnMatrix * eyeVect);
 
-    vec3 lightVect = normalize(v_lightDirection.xyz);
+    vec3 lightVect;
+    if (v_lightProperty.type == 0)
+        lightVect = normalize(v_lightProperty.direction.xyz);
+    else
+    {
+        lightVect = normalize(v_position - v_lightProperty.position).xyz;
+        if (v_lightProperty.type == 2)
+        {
+            float angle = acos(dot(v_lightProperty.direction, lightVect));
+            if (angle > v_lightProperty.cutoff)
+                lightVect = vec3(0.0f, 0.0f, 0.0f);
+        }
+    }
     if (u_isUsingNormalMap == true) lightVect = normalize(v_tbnMatrix * lightVect);
 
     vec3 reflectLight = normalize(reflect(lightVect, usingNormal));

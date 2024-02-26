@@ -20,6 +20,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     camera3d.cpp \
     group3d.cpp \
+    light.cpp \
     main.cpp \
     material.cpp \
     materiallibrary.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     camera3d.h \
     group3d.h \
+    light.h \
     material.h \
     materiallibrary.h \
     objectengine3d.h \

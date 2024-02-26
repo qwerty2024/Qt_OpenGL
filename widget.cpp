@@ -9,7 +9,7 @@
 #include <material.h>
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions>
-
+#include <light.h>
 
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -19,18 +19,28 @@ Widget::Widget(QWidget *parent)
     m_fbHeight = 1024;
     m_fbWidth = 1024;
 
+    angleObject = 0;
+    angleGroup1 = 0;
+    angleGroup2 = 0;
+    angleMain = 0;
+
     m_projectionLightMatrix.setToIdentity();
     m_projectionLightMatrix.ortho(-40, 40, -40, 40, -40, 40);
 
-    m_lightRotateX = 30;
-    m_lightRotateY = 40;
-    m_shadowLightMatrix.setToIdentity();
-    m_shadowLightMatrix.rotate(m_lightRotateX, 1.0f, 0.0f, 0.0f);
-    m_shadowLightMatrix.rotate(m_lightRotateY, 0.0f, 1.0f, 0.0f);
+    //m_lightRotateX = 30;
+    //m_lightRotateY = 40;
+    //m_shadowLightMatrix.setToIdentity();
+    //m_shadowLightMatrix.rotate(m_lightRotateX, 1.0f, 0.0f, 0.0f);
+    //m_shadowLightMatrix.rotate(m_lightRotateY, 0.0f, 1.0f, 0.0f);
+    //
+    //m_lightMatrix.setToIdentity();
+    //m_lightMatrix.rotate(-m_lightRotateY, 0.0f, 1.0f, 0.0f);
+    //m_lightMatrix.rotate(-m_lightRotateX, 1.0f, 0.0f, 0.0f);
 
-    m_lightMatrix.setToIdentity();
-    m_lightMatrix.rotate(-m_lightRotateY, 0.0f, 1.0f, 0.0f);
-    m_lightMatrix.rotate(-m_lightRotateX, 1.0f, 0.0f, 0.0f);
+    m_light1 = new Light(Light::Spot);
+    m_light1->setPosition(QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
+    m_light1->setDirection(QVector4D(-1.0f, -1.0f, -1.0f, 0.0f));
+    m_light1->setCutoff(20.0f / 180.0f * M_PI);
 }
 
 Widget::~Widget()
@@ -214,7 +224,7 @@ void Widget::paintGL()
 
     m_programDepth.bind();
     m_programDepth.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
-    m_programDepth.setUniformValue("u_shadowLightMatrix", m_shadowLightMatrix);
+    m_programDepth.setUniformValue("u_shadowLightMatrix", m_light1->getLightMatrix());
 
     for(int i = 0; i < m_TransformObject.size(); i++)
     {
@@ -242,11 +252,18 @@ void Widget::paintGL()
     m_program.bind();
     m_program.setUniformValue("u_shadowMap", GL_TEXTURE4 - GL_TEXTURE0);
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
-    m_program.setUniformValue("u_lightDirection", QVector4D(0.0, 0.0, -1.0, 0.0));
+//    m_program.setUniformValue("u_lightDirection", QVector4D(0.0, 0.0, -1.0, 0.0));
     m_program.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
-    m_program.setUniformValue("u_shadowLightMatrix", m_shadowLightMatrix);
-    m_program.setUniformValue("u_lightMatrix", m_lightMatrix);
+    m_program.setUniformValue("u_shadowLightMatrix", m_light1->getLightMatrix());
+//    m_program.setUniformValue("u_lightMatrix", m_lightMatrix);
     m_program.setUniformValue("u_lightPower", 1.0f);
+    m_program.setUniformValue("u_lightProperty.ambienceColor", m_light1->getAmbienceColor());
+    m_program.setUniformValue("u_lightProperty.diffuseColor", m_light1->getDiffuseColor());
+    m_program.setUniformValue("u_lightProperty.specularColor", m_light1->getSpecularColor());
+    m_program.setUniformValue("u_lightProperty.position", m_light1->getPosition());
+    m_program.setUniformValue("u_lightProperty.direction", m_light1->getDirection());
+    m_program.setUniformValue("u_lightProperty.cutoff", m_light1->getCutoff());
+    m_program.setUniformValue("u_lightProperty.type", m_light1->getType());
 
     m_camera->draw(&m_program);
 

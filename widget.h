@@ -15,6 +15,7 @@ class Group3D;
 class Camera3D;
 class SkyBox;
 class ObjectEngine3D;
+class Light;
 
 class Widget : public QOpenGLWidget
 {
@@ -40,11 +41,11 @@ protected:
 private:
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_projectionLightMatrix;
-    QMatrix4x4 m_lightMatrix;
-    QMatrix4x4 m_shadowLightMatrix;
+    //QMatrix4x4 m_lightMatrix;
+    //QMatrix4x4 m_shadowLightMatrix;
 
-    float m_lightRotateX;
-    float m_lightRotateY;
+    //float m_lightRotateX;
+    //float m_lightRotateY;
 
     QOpenGLShaderProgram m_program;
     QOpenGLShaderProgram m_programSkybox;
@@ -69,6 +70,8 @@ private:
     QOpenGLFramebufferObject *m_depthBuffer;
     quint32 m_fbHeight;
     quint32 m_fbWidth;
+
+    Light *m_light1;
 };
 #endif // WIDGET_H
 
