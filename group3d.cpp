@@ -92,3 +92,4 @@ void Group3D::delObject(const int &index)
 {
     m_object.remove(index);
 }
+

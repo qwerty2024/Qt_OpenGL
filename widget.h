@@ -38,6 +38,8 @@ protected:
     void timerEvent(QTimerEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
+    QVector3D screenCoordsToWorldCoords(const QVector2D &mousePos);
+
 private:
     QMatrix4x4 m_projectionMatrix;
     QMatrix4x4 m_projectionLightMatrix;

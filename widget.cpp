@@ -71,6 +71,17 @@ void Widget::mousePressEvent(QMouseEvent *event)
     if (event->buttons() == Qt::LeftButton)
     {
         m_mousePosition = QVector2D(event->localPos());
+    } else if (event->buttons() == Qt::RightButton)
+    {
+        QVector3D t = screenCoordsToWorldCoords(QVector2D(event->localPos()));
+
+        QImage diffuseMapCube(":/cube.png");
+        QImage normalMapCube(":/cube_normal.jpg");
+        initCube(2.0f, 2.0f, 2.0f, &diffuseMapCube, &normalMapCube);
+        m_objects[m_objects.size() - 1]->translate(t);
+        m_TransformObject.append(m_objects[m_objects.size() - 1]);
+
+        update();
     }
     event->accept();
 }
@@ -168,6 +179,34 @@ void Widget::keyPressEvent(QKeyEvent *event)
     update();
 }
 
+QVector3D Widget::screenCoordsToWorldCoords(const QVector2D &mousePos)
+{
+    QVector4D tmp(2.0f * mousePos.x() / width() - 1.0f,
+                  -2.0f * mousePos.y() / height() + 1.0f,
+                  -1.0f,
+                  1.0f);
+
+    QVector4D iTmp((m_projectionMatrix.inverted() * tmp).toVector2D(), -1.0f, 0.0f);
+
+    QVector3D Direction((m_camera->getViewMatrix().inverted() * iTmp).toVector3D().normalized());
+
+    QVector3D camPos((m_camera->getViewMatrix().inverted() * QVector4D(0.0f, 0.0f, 0.0f, 1.0f)).toVector3D());
+
+    // Ax + By + Cz + D = 0   уравнение плоскости
+    // Norm = (A, B, C)
+    // P * N - P0 * N = 0 уравнение плоскости в векторном виде
+    // O + D * t
+    // (O + D * t) * N - P0 * N = 0
+    // t = (P0 * N - O * N) / (D * N)
+    // result = O + D * t
+
+    QVector3D N(0.0f, 1.0f, 0.0f);
+    float t = -QVector3D::dotProduct(camPos, N) / QVector3D::dotProduct(Direction, N);
+    QVector3D result = camPos + Direction * t;
+
+    return result;
+}
+
 void Widget::initializeGL()
 {
     glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -220,7 +259,7 @@ void Widget::initializeGL()
 
     m_depthBuffer = new QOpenGLFramebufferObject(m_fbWidth, m_fbHeight, QOpenGLFramebufferObject::Depth);
 
-    m_timer.start(30, this);
+    //m_timer.start(30, this);
 }
 
 void Widget::resizeGL(int w, int h)
