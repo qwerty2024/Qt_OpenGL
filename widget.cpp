@@ -37,7 +37,7 @@ Widget::Widget(QWidget *parent)
     //m_lightMatrix.rotate(-m_lightRotateY, 0.0f, 1.0f, 0.0f);
     //m_lightMatrix.rotate(-m_lightRotateX, 1.0f, 0.0f, 0.0f);
 
-    m_light[0] = new Light(Light::Spot);
+    m_light[0] = new Light(Light::Directional);
     m_light[0]->setPosition(QVector4D(7.0f, 7.0f, 7.0f, 1.0f));
     m_light[0]->setDirection(QVector4D(-1.0f, -1.0f, -1.0f, 0.0f));
     m_light[0]->setDiffuseColor(QVector3D(1.0f, 0.0f, 0.0f));
@@ -82,11 +82,14 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
     QVector2D diff = QVector2D(event->localPos()) - m_mousePosition;
     m_mousePosition = QVector2D(event->localPos());
 
-    float angle = diff.length() / 2.0;
+    //float angle = diff.length() / 2.0;
+    //QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
+    //m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
 
-    QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
-
-    m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
+    float angelX = diff.y() / 2.0f;
+    float angelY = diff.x() / 2.0f;
+    m_camera->rotateX(QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, angelX));
+    m_camera->rotateY(QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, angelY));
 
     update();
 }

@@ -13,7 +13,7 @@ Light::Light(const Type &type) :
 {
     m_lightMatrix.setToIdentity();
     m_lightMatrix.lookAt(m_position.toVector3D(),
-                         (m_position + m_direction).toVector3D(),
+                         (m_position.normalized() + m_direction).toVector3D(),
                          QVector3D(m_direction.x(), m_direction.z(), -m_direction.y())
                          );
 }
@@ -53,7 +53,7 @@ void Light::setPosition(const QVector4D &position)
     m_position = position;
     m_lightMatrix.setToIdentity();
     m_lightMatrix.lookAt(m_position.toVector3D(),
-                         (m_position + m_direction).toVector3D(),
+                         (m_position.normalized() + m_direction).toVector3D(),
                          QVector3D(m_direction.x(), m_direction.z(), -m_direction.y())
                          );
 }
@@ -68,7 +68,7 @@ void Light::setDirection(const QVector4D &direction)
     m_direction = direction.normalized();
     m_lightMatrix.setToIdentity();
     m_lightMatrix.lookAt(m_position.toVector3D(),
-                         (m_position + m_direction).toVector3D(),
+                         (m_position.normalized() + m_direction).toVector3D(),
                          QVector3D(m_direction.x(), m_direction.z(), -m_direction.y())
                          );
 }
