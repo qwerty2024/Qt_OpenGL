@@ -37,10 +37,23 @@ Widget::Widget(QWidget *parent)
     //m_lightMatrix.rotate(-m_lightRotateY, 0.0f, 1.0f, 0.0f);
     //m_lightMatrix.rotate(-m_lightRotateX, 1.0f, 0.0f, 0.0f);
 
-    m_light1 = new Light(Light::Spot);
-    m_light1->setPosition(QVector4D(1.0f, 1.0f, 1.0f, 1.0f));
-    m_light1->setDirection(QVector4D(-1.0f, -1.0f, -1.0f, 0.0f));
-    m_light1->setCutoff(20.0f / 180.0f * M_PI);
+    m_light[0] = new Light(Light::Spot);
+    m_light[0]->setPosition(QVector4D(7.0f, 7.0f, 7.0f, 1.0f));
+    m_light[0]->setDirection(QVector4D(-1.0f, -1.0f, -1.0f, 0.0f));
+    m_light[0]->setDiffuseColor(QVector3D(1.0f, 0.0f, 0.0f));
+    m_light[0]->setCutoff(30.0f / 180.0f * M_PI);
+
+    m_light[1] = new Light(Light::Spot);
+    m_light[1]->setPosition(QVector4D(-7.0f, 7.0f, 7.0f, 1.0f));
+    m_light[1]->setDirection(QVector4D(1.0f, -1.0f, -1.0f, 0.0f));
+    m_light[1]->setDiffuseColor(QVector3D(0.0f, 1.0f, 0.0f));
+    m_light[1]->setCutoff(50.0f / 180.0f * M_PI);
+
+    m_light[2] = new Light(Light::Spot);
+    m_light[2]->setPosition(QVector4D(7.0f, 7.0f, -7.0f, 1.0f));
+    m_light[2]->setDirection(QVector4D(-1.0f, -1.0f, 1.0f, 0.0f));
+    m_light[2]->setDiffuseColor(QVector3D(0.0f, 0.0f, 1.0f));
+    m_light[2]->setCutoff(35.0f / 180.0f * M_PI);
 }
 
 Widget::~Widget()
@@ -224,7 +237,7 @@ void Widget::paintGL()
 
     m_programDepth.bind();
     m_programDepth.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
-    m_programDepth.setUniformValue("u_shadowLightMatrix", m_light1->getLightMatrix());
+    m_programDepth.setUniformValue("u_shadowLightMatrix", m_light[0]->getLightMatrix());
 
     for(int i = 0; i < m_TransformObject.size(); i++)
     {
@@ -254,16 +267,22 @@ void Widget::paintGL()
     m_program.setUniformValue("u_projectionMatrix", m_projectionMatrix);
 //    m_program.setUniformValue("u_lightDirection", QVector4D(0.0, 0.0, -1.0, 0.0));
     m_program.setUniformValue("u_projectionLightMatrix", m_projectionLightMatrix);
-    m_program.setUniformValue("u_shadowLightMatrix", m_light1->getLightMatrix());
+    m_program.setUniformValue("u_shadowLightMatrix", m_light[0]->getLightMatrix());
 //    m_program.setUniformValue("u_lightMatrix", m_lightMatrix);
     m_program.setUniformValue("u_lightPower", 1.0f);
-    m_program.setUniformValue("u_lightProperty.ambienceColor", m_light1->getAmbienceColor());
-    m_program.setUniformValue("u_lightProperty.diffuseColor", m_light1->getDiffuseColor());
-    m_program.setUniformValue("u_lightProperty.specularColor", m_light1->getSpecularColor());
-    m_program.setUniformValue("u_lightProperty.position", m_light1->getPosition());
-    m_program.setUniformValue("u_lightProperty.direction", m_light1->getDirection());
-    m_program.setUniformValue("u_lightProperty.cutoff", m_light1->getCutoff());
-    m_program.setUniformValue("u_lightProperty.type", m_light1->getType());
+    for (int i = 0; i < 3; i++)
+    {
+        m_program.setUniformValue(QString("u_lightProperty[%1].ambienceColor").arg(i).toLatin1().data(), m_light[i]->getAmbienceColor());
+        m_program.setUniformValue(QString("u_lightProperty[%1].diffuseColor").arg(i).toLatin1().data(), m_light[i]->getDiffuseColor());
+        m_program.setUniformValue(QString("u_lightProperty[%1].specularColor").arg(i).toLatin1().data(), m_light[i]->getSpecularColor());
+        m_program.setUniformValue(QString("u_lightProperty[%1].position").arg(i).toLatin1().data(), m_light[i]->getPosition());
+        m_program.setUniformValue(QString("u_lightProperty[%1].direction").arg(i).toLatin1().data(), m_light[i]->getDirection());
+        m_program.setUniformValue(QString("u_lightProperty[%1].cutoff").arg(i).toLatin1().data(), m_light[i]->getCutoff());
+        m_program.setUniformValue(QString("u_lightProperty[%1].type").arg(i).toLatin1().data(), m_light[i]->getType());
+    }
+    m_program.setUniformValue("u_countLights", 3);
+    m_program.setUniformValue("u_indexLightForShadow", 0);
+
 
     m_camera->draw(&m_program);
 
