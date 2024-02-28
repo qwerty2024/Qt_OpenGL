@@ -165,6 +165,19 @@ void ObjectEngine3D::scale(const float &s)
         m_objects[i]->scale(s);
 }
 
+void ObjectEngine3D::scale(const float &sx, const float &sy, const float &sz)
+{
+    for (int i = 0; i < m_objects.size(); i++)
+    {
+        m_objects[i]->scale(sx, sy, sz);
+    }
+}
+
+void ObjectEngine3D::scale(const QVector3D &s)
+{
+    scale(s.x(), s.y(), s.z());
+}
+
 void ObjectEngine3D::setGlobalTransform(const QMatrix4x4 &g)
 {
     for (int i = 0; i < m_objects.size(); i++)

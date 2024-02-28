@@ -7,13 +7,13 @@
 SimpleObject3D::SimpleObject3D() :
     m_indexBuffer(QOpenGLBuffer::IndexBuffer), m_diffuseMap(nullptr)
 {
-    m_scale = 1.0f;
+    m_scale = QVector3D(1.0f, 1.0f, 1.0f);
 }
 
 SimpleObject3D::SimpleObject3D(const QVector<VertexData> &vertData, const QVector<GLuint> &indexes, Material *material) :
     m_indexBuffer(QOpenGLBuffer::IndexBuffer), m_diffuseMap(nullptr)
 {
-    m_scale = 1.0f;
+    m_scale = QVector3D(1.0f, 1.0f, 1.0f);
     init(vertData, indexes, material);
 }
 
@@ -159,6 +159,18 @@ void SimpleObject3D::translate(const QVector3D &t)
 void SimpleObject3D::scale(const float &s)
 {
     m_scale *= s;
+}
+
+void SimpleObject3D::scale(const float &sx, const float &sy, const float &sz)
+{
+    m_scale.setX(sx);
+    m_scale.setY(sy);
+    m_scale.setZ(sz);
+}
+
+void SimpleObject3D::scale(const QVector3D &s)
+{
+    scale(s.x(), s.y(), s.z());
 }
 
 void SimpleObject3D::setGlobalTransform(const QMatrix4x4 &g)

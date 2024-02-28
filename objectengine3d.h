@@ -16,6 +16,8 @@ public:
     void rotate(const QQuaternion &r);
     void translate(const QVector3D &t);
     void scale(const float &s);
+    void scale(const float &sx, const float &sy, const float &sz);
+    void scale(const QVector3D &s);
     void setGlobalTransform(const QMatrix4x4 &g);
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
 

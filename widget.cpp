@@ -14,6 +14,7 @@
 Widget::Widget(QWidget *parent)
     : QOpenGLWidget(parent)
 {
+    setMouseTracking(true);
     m_camera = new Camera3D;
     m_camera->translate(QVector3D(0.0f, 0.0f, -15.0f));
     m_fbHeight = 1024;
@@ -23,6 +24,8 @@ Widget::Widget(QWidget *parent)
     angleGroup1 = 0;
     angleGroup2 = 0;
     angleMain = 0;
+
+    m_state = Idle;
 
     m_projectionLightMatrix.setToIdentity();
     m_projectionLightMatrix.ortho(-40, 40, -40, 40, -40, 40);
@@ -75,32 +78,98 @@ void Widget::mousePressEvent(QMouseEvent *event)
     {
         QVector3D t = screenCoordsToWorldCoords(QVector2D(event->localPos()));
 
-        QImage diffuseMapCube(":/cube.png");
-        QImage normalMapCube(":/cube_normal.jpg");
-        initCube(2.0f, 2.0f, 2.0f, &diffuseMapCube, &normalMapCube);
-        m_objects[m_objects.size() - 1]->translate(t);
-        m_TransformObject.append(m_objects[m_objects.size() - 1]);
+        if (m_state == Idle)
+        {
+            m_firstPoint = t;
+            m_movePoint = t;
+
+            QImage diffuseMapCube(":/cube.png");
+            QImage normalMapCube(":/cube_normal.jpg");
+            initCube(1.0f, 1.0f, 1.0f, &diffuseMapCube, &normalMapCube);
+            m_objects[m_objects.size() - 1]->scale(0.0f, 0.0f, 0.0f);
+            m_objects[m_objects.size() - 1]->translate(t);
+            m_TransformObject.append(m_objects[m_objects.size() - 1]);
+
+            m_state = CreatePlane;
+        }else if (m_state == CreateHeight)
+        {
+            QVector3D diff = t - m_secondPoint;
+            QVector3D diffOld = m_secondPoint - m_firstPoint;
+
+            m_objects[m_objects.size() - 1]->scale(diffOld.x(), diff.y(), diffOld.z());
+            m_objects[m_objects.size() - 1]->translate(QVector3D(0.0f, (t - m_movePoint).y() / 2.0f, 0.0f));
+
+            m_state = Idle;
+        }
 
         update();
     }
     event->accept();
 }
 
+void Widget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (m_state == CreatePlane)
+    {
+        QVector3D t = screenCoordsToWorldCoords(QVector2D(event->localPos()));
+        QVector3D diff = t - m_firstPoint;
+
+        m_objects[m_objects.size() - 1]->scale(diff.x(), 0.0f, diff.z());
+        m_objects[m_objects.size() - 1]->translate((t - m_movePoint) / 2.0f);
+
+        m_movePoint = t;
+        m_secondPoint = t;
+
+        m_state = CreateHeight;
+    }
+}
+
 void Widget::mouseMoveEvent(QMouseEvent *event)
 {
-    if (event->buttons() != Qt::LeftButton) return;
+    //if (event->buttons() != Qt::LeftButton && event->buttons() != Qt::RightButton) return;
 
-    QVector2D diff = QVector2D(event->localPos()) - m_mousePosition;
-    m_mousePosition = QVector2D(event->localPos());
+    if (event->buttons() == Qt::LeftButton)
+    {
+        QVector2D diff = QVector2D(event->localPos()) - m_mousePosition;
+        m_mousePosition = QVector2D(event->localPos());
 
-    //float angle = diff.length() / 2.0;
-    //QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
-    //m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
+        //float angle = diff.length() / 2.0;
+        //QVector3D axis = QVector3D(diff.y(), diff.x(), 0.0);
+        //m_camera->rotate(QQuaternion::fromAxisAndAngle(axis, angle));
 
-    float angelX = diff.y() / 2.0f;
-    float angelY = diff.x() / 2.0f;
-    m_camera->rotateX(QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, angelX));
-    m_camera->rotateY(QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, angelY));
+        float angelX = diff.y() / 2.0f;
+        float angelY = diff.x() / 2.0f;
+        m_camera->rotateX(QQuaternion::fromAxisAndAngle(1.0f, 0.0f, 0.0f, angelX));
+        m_camera->rotateY(QQuaternion::fromAxisAndAngle(0.0f, 1.0f, 0.0f, angelY));
+    } else if (event->buttons() == Qt::RightButton)
+    {
+        QVector3D t = screenCoordsToWorldCoords(QVector2D(event->localPos()));
+
+        if (m_state == CreatePlane)
+        {
+            QVector3D diff = t - m_firstPoint;
+
+            m_objects[m_objects.size() - 1]->scale(diff.x(), 0.0f, diff.z());
+            m_objects[m_objects.size() - 1]->translate((t - m_movePoint) / 2.0f);
+
+            m_movePoint = t;
+        }
+    } else if (event->buttons() == Qt::NoButton)
+    {
+        QVector3D t = screenCoordsToWorldCoords(QVector2D(event->localPos()));
+
+        if (m_state == CreateHeight)
+        {
+            QVector3D diff = t - m_secondPoint;
+            QVector3D diffOld = m_secondPoint - m_firstPoint;
+
+            m_objects[m_objects.size() - 1]->scale(diffOld.x(), diff.y(), diffOld.z());
+            m_objects[m_objects.size() - 1]->translate(QVector3D(0.0f, (t - m_movePoint).y() / 2.0f, 0.0f));
+
+            m_movePoint = t;
+        }
+    }
+
 
     update();
 }
@@ -200,8 +269,18 @@ QVector3D Widget::screenCoordsToWorldCoords(const QVector2D &mousePos)
     // t = (P0 * N - O * N) / (D * N)
     // result = O + D * t
 
-    QVector3D N(0.0f, 1.0f, 0.0f);
-    float t = -QVector3D::dotProduct(camPos, N) / QVector3D::dotProduct(Direction, N);
+    QVector3D N;
+    QVector3D P0;
+    if (m_state == CreatePlane || m_state == Idle)
+    {
+        N = QVector3D(0.0f, 1.0f, 0.0f);
+        P0 = QVector3D(0.0f, 0.0f, 0.0f);
+    } else if (m_state == CreateHeight)
+    {
+        N = QVector3D(0.0f, 0.0f, 1.0f);
+        P0 = m_secondPoint;
+    }
+    float t = (QVector3D::dotProduct(P0, N) - QVector3D::dotProduct(camPos, N)) / QVector3D::dotProduct(Direction, N);
     QVector3D result = camPos + Direction * t;
 
     return result;

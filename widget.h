@@ -25,6 +25,13 @@ public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
 
+    enum CreateState
+    {
+        Idle,
+        CreatePlane,
+        CreateHeight
+    };
+
 protected:
     void initializeGL() override;
     void resizeGL(int w, int h) override;
@@ -33,6 +40,7 @@ protected:
     void initCube(float width, float height, float depth, QImage *diffuseMap = nullptr, QImage *normalMap = nullptr);
 
     void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
     void timerEvent(QTimerEvent *event) override;
@@ -74,6 +82,11 @@ private:
     quint32 m_fbWidth;
 
     Light *m_light[3];
+
+    CreateState m_state;
+    QVector3D m_firstPoint;
+    QVector3D m_secondPoint;
+    QVector3D m_movePoint;
 };
 #endif // WIDGET_H
 

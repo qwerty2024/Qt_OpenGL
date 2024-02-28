@@ -35,6 +35,8 @@ public:
     void rotate(const QQuaternion &r);
     void translate(const QVector3D &t);
     void scale(const float &s);
+    void scale(const float &sx, const float &sy, const float &sz);
+    void scale(const QVector3D &s);
     void setGlobalTransform(const QMatrix4x4 &g);
     void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
 
@@ -50,7 +52,7 @@ private:
 
     QQuaternion m_rotate;
     QVector3D m_translate;
-    float m_scale;
+    QVector3D m_scale;
     QMatrix4x4 m_globalTransform;
 
     Material *m_material;
