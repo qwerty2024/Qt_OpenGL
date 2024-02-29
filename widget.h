@@ -46,6 +46,8 @@ protected:
     void timerEvent(QTimerEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
 
+    int selectObject(int x, int y, QVector<Transformational *> &objs);
+
     QVector3D screenCoordsToWorldCoords(const QVector2D &mousePos);
 
 private:
@@ -60,11 +62,13 @@ private:
     QOpenGLShaderProgram m_program;
     QOpenGLShaderProgram m_programSkybox;
     QOpenGLShaderProgram m_programDepth;
+    QOpenGLShaderProgram m_programSelect;
 
     QVector2D m_mousePosition;
 
     QVector<ObjectEngine3D *> m_objects;
     QVector<Transformational *> m_TransformObject;
+    QVector<Transformational *> m_selectObjects;
     QVector<Group3D *> m_groups;
 
     QBasicTimer m_timer;
@@ -78,6 +82,7 @@ private:
     SkyBox *m_skybox;
 
     QOpenGLFramebufferObject *m_depthBuffer;
+    QOpenGLFramebufferObject *m_selectBuffer;
     quint32 m_fbHeight;
     quint32 m_fbWidth;
 

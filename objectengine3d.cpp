@@ -184,8 +184,8 @@ void ObjectEngine3D::setGlobalTransform(const QMatrix4x4 &g)
         m_objects[i]->setGlobalTransform(g);
 }
 
-void ObjectEngine3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions)
+void ObjectEngine3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
     for (int i = 0; i < m_objects.size(); i++)
-        m_objects[i]->draw(program, functions);
+        m_objects[i]->draw(program, functions, usingTextures);
 }

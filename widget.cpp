@@ -20,6 +20,8 @@ Widget::Widget(QWidget *parent)
     m_fbHeight = 1024;
     m_fbWidth = 1024;
 
+    m_selectBuffer = nullptr;
+
     angleObject = 0;
     angleGroup1 = 0;
     angleGroup2 = 0;
@@ -103,6 +105,10 @@ void Widget::mousePressEvent(QMouseEvent *event)
         }
 
         update();
+    } else if (event->buttons() == Qt::MiddleButton)
+    {
+        int res = selectObject(event->x(), event->y(), m_selectObjects);
+        qDebug() << res;
     }
     event->accept();
 }
@@ -248,6 +254,41 @@ void Widget::keyPressEvent(QKeyEvent *event)
     update();
 }
 
+int Widget::selectObject(int x, int y, QVector<Transformational *> &objs)
+{
+    m_selectBuffer->bind();
+
+    glViewport(0, 0, width(), height());
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_DEPTH_TEST);
+
+    m_programSelect.bind();
+    m_programSelect.setUniformValue("u_projectionMatrix", m_projectionMatrix);
+
+    m_camera->draw(&m_programSelect);
+
+    for (int i = 0; i < objs.size(); i++)
+    {
+        m_programSelect.setUniformValue("u_code", (float)((i + 1) * 64));
+        objs[i]->draw(&m_programSelect, context()->functions(), false);
+    }
+    m_programSelect.release();
+
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    unsigned char res[4];
+    glReadPixels(x, viewport[3] - y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res[0]);
+
+    glDisable(GL_DEPTH_TEST);
+
+    m_selectBuffer->toImage().save("123.bmp");
+
+    m_selectBuffer->release();
+
+    return res[0];
+}
+
 QVector3D Widget::screenCoordsToWorldCoords(const QVector2D &mousePos)
 {
     QVector4D tmp(2.0f * mousePos.x() / width() - 1.0f,
@@ -302,6 +343,7 @@ void Widget::initializeGL()
     m_objects[m_objects.size() - 1]->scale(3.0f);
 
     m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
+    m_selectObjects.append(m_objects[m_objects.size() - 1]);
 
     m_objects.append(new ObjectEngine3D);
     m_objects[m_objects.size() - 1]->loadObjectFromFile(":/model/bibika.obj");
@@ -309,6 +351,7 @@ void Widget::initializeGL()
 
     m_groups.append(new Group3D);
     m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
+    m_selectObjects.append(m_objects[m_objects.size() - 1]);
 
     m_groups[0]->translate(QVector3D(-8.0f, 0.0f, 0.0f));
     m_groups[1]->translate(QVector3D(8.0f, 0.0f, 0.0f));
@@ -324,6 +367,7 @@ void Widget::initializeGL()
     QImage normalMapCube(":/cube_normal.jpg");
     initCube(2.0f, 2.0f, 2.0f, &diffuseMapCube, &normalMapCube);
     m_groups[m_groups.size() - 1]->addObject(m_objects[m_objects.size() - 1]);
+    m_selectObjects.append(m_objects[m_objects.size() - 1]);
 
     m_groups[m_groups.size() - 1]->addObject(m_camera);
 
@@ -337,7 +381,7 @@ void Widget::initializeGL()
     m_skybox = new SkyBox(100, QImage(":/sky.png"));
 
     m_depthBuffer = new QOpenGLFramebufferObject(m_fbWidth, m_fbHeight, QOpenGLFramebufferObject::Depth);
-
+    m_selectBuffer = new QOpenGLFramebufferObject(width(), height());
     //m_timer.start(30, this);
 }
 
@@ -346,6 +390,9 @@ void Widget::resizeGL(int w, int h)
     float aspect = w / (h ? (float)h : 1);
     m_projectionMatrix.setToIdentity();
     m_projectionMatrix.perspective(45, aspect, 0.01f, 1000.0f);
+
+    if (m_selectBuffer != 0) delete m_selectBuffer;
+    m_selectBuffer = new QOpenGLFramebufferObject(w, h);
 }
 
 void Widget::paintGL()
@@ -418,29 +465,30 @@ void Widget::initShaders()
 {
     if (!m_programSkybox.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/skybox.vsh"))
         close();
-
     if (!m_programSkybox.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/skybox.fsh"))
         close();
-
     if (!m_programSkybox.link())
         close();
 
     if (!m_program.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/vshader.vsh"))
         close();
-
     if (!m_program.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/fshader.fsh"))
         close();
-
     if (!m_program.link())
         close();
 
     if (!m_programDepth.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/depth.vsh"))
         close();
-
     if (!m_programDepth.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/depth.fsh"))
         close();
-
     if (!m_programDepth.link())
+        close();
+
+    if (!m_programSelect.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/select.vsh"))
+        close();
+    if (!m_programSelect.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/select.fsh"))
+        close();
+    if (!m_programSelect.link())
         close();
 }
 

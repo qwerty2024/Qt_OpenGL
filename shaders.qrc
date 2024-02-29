@@ -6,5 +6,7 @@
         <file>skybox.fsh</file>
         <file>depth.vsh</file>
         <file>depth.fsh</file>
+        <file>select.vsh</file>
+        <file>select.fsh</file>
     </qresource>
 </RCC>

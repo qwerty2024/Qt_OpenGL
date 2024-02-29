@@ -17,7 +17,7 @@ public:
     void translate(const QVector3D &t);
     void scale(const float &s);
     void setGlobalTransform(const QMatrix4x4 &g);
-    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions = nullptr);
+    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions = nullptr, bool usingTextures = true);
 
     const QMatrix4x4 &getViewMatrix() const;
 

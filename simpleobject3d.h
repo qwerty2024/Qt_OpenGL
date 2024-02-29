@@ -38,7 +38,7 @@ public:
     void scale(const float &sx, const float &sy, const float &sz);
     void scale(const QVector3D &s);
     void setGlobalTransform(const QMatrix4x4 &g);
-    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
+    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
 
 
     QOpenGLTexture *normaleMap() const;

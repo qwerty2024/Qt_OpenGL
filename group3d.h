@@ -15,7 +15,7 @@ public:
     void translate(const QVector3D &t);
     void scale(const float &s);
     void setGlobalTransform(const QMatrix4x4 &g);
-    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions);
+    void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true);
 
     void addObject(Transformational *obj);
     void delObject(Transformational *obj);

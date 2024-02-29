@@ -62,11 +62,11 @@ void Group3D::setGlobalTransform(const QMatrix4x4 &g)
         m_object[i]->setGlobalTransform(localMatrix);
 }
 
-void Group3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions)
+void Group3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
     for(int i = 0; i < m_object.size(); i++)
     {
-        m_object[i]->draw(program, functions);
+        m_object[i]->draw(program, functions, usingTextures);
     }
 }
 

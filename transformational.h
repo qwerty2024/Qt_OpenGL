@@ -15,7 +15,7 @@ public:
     virtual void translate(const QVector3D &t) = 0;
     virtual void scale(const float &s) = 0;
     virtual void setGlobalTransform(const QMatrix4x4 &g) = 0;
-    virtual void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions) = 0;
+    virtual void draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures = true) = 0;
 };
 
 #endif // TRANSFORMATIONAL_H

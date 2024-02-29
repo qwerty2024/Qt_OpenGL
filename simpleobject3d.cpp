@@ -68,22 +68,24 @@ void SimpleObject3D::rotate(const QQuaternion &r)
     m_rotate = r * m_rotate;
 }
 
-void SimpleObject3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions)
+void SimpleObject3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
     if (!m_vertexBuffer.isCreated() || !m_indexBuffer.isCreated()) return;
 
-    if (m_material->isUsingDiffuseMap())
+    if (usingTextures == true)
     {
-        m_diffuseMap->bind(0);
-        program->setUniformValue("u_diffuseMap", 0);
-    }
+        if (m_material->isUsingDiffuseMap())
+        {
+            m_diffuseMap->bind(0);
+            program->setUniformValue("u_diffuseMap", 0);
+        }
 
-    if (m_material->isUsingNormalMap())
-    {
-        m_normalMap->bind(1);
-        program->setUniformValue("u_normalMap", 1);
+        if (m_material->isUsingNormalMap())
+        {
+            m_normalMap->bind(1);
+            program->setUniformValue("u_normalMap", 1);
+        }
     }
-
     QMatrix4x4 modelMatrix;
     modelMatrix.setToIdentity();
     modelMatrix.translate(m_translate);
@@ -137,8 +139,11 @@ void SimpleObject3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *funct
 
     m_vertexBuffer.release();
     m_indexBuffer.release();
-    if (m_material->isUsingDiffuseMap()) m_diffuseMap->release();
-    if (m_material->isUsingNormalMap()) m_normalMap->release();
+    if (usingTextures == true)
+    {
+        if (m_material->isUsingDiffuseMap()) m_diffuseMap->release();
+        if (m_material->isUsingNormalMap()) m_normalMap->release();
+    }
 }
 
 QOpenGLTexture *SimpleObject3D::normaleMap() const

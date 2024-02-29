@@ -84,7 +84,7 @@ void SkyBox::setGlobalTransform(const QMatrix4x4 &g)
     (void)g;
 }
 
-void SkyBox::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions)
+void SkyBox::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
-    m_cube->draw(program, functions);
+    m_cube->draw(program, functions, usingTextures);
 }

@@ -48,7 +48,7 @@ void Camera3D::setGlobalTransform(const QMatrix4x4 &g)
     updateViewMatrix();
 }
 
-void Camera3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions)
+void Camera3D::draw(QOpenGLShaderProgram *program, QOpenGLFunctions *functions, bool usingTextures)
 {
     if (functions != nullptr) return;
 
